@@ -1,0 +1,20 @@
+{
+  "name": "employee-tacker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JayArghArgh/employee-tacker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JayArghArgh/employee-tacker/issues"
+  },
+  "homepage": "https://github.com/JayArghArgh/employee-tacker#readme"
+}
