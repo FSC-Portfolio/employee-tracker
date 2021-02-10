@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/JayArghArgh/employee-tacker/issues"
   },
-  "homepage": "https://github.com/JayArghArgh/employee-tacker#readme"
+  "homepage": "https://github.com/JayArghArgh/employee-tacker#readme",
+  "dependencies": {
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1"
+  }
 }
