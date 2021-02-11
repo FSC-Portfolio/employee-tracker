@@ -10,29 +10,34 @@ const connection = mysql.createConnection({
 	database: 'emp_tracker_db',
 });
 
-const addItem = () => {
-	const query = 'SELECT * FROM department';
-	connection.query(query, (err, res) => {
-		console.log("adding");
-	})
+const addItem = (tableName, itemsToAdd) => {
+	const query = "INSERT INTO ?? SET ?";
+	let values = itemsToAdd;
+	connection.query(query, [tableName, values], (err, result) => {
+		if (err) throw err;
+		console.log(result);
+	});
 };
 
-const viewItem = () => {
-	const query = 'SELECT * FROM department';
-	connection.query(query, (err, res) => {
+const viewItem = (tableName) => {
+	const query = 'SELECT * FROM ?';
+	connection.query(query, tableName, (err, res) => {
 		console.log("view");
 	})
 };
 
-const updateItem = () => {
-	const query = 'SELECT * FROM department';
-	connection.query(query, (err, res) => {
+const updateItem = (tableName) => {
+	const query = 'SELECT * FROM ?';
+	connection.query(query, tableName, (err, res) => {
 		console.log("updating");
 	})
 };
 
 connection.connect((err) => {
 	if(err) throw err;
-	addItem();
+	// addItem("department", {title: "survey"});
+	// addItem("role", {title: "Surveyor", salary: 99999.99, department_id: 1});
+	addItem("employee",
+		{first_name: "Frank", last_name: "Beans", role_id: 1, manager_id: 1});
 	connection.end();
 });
