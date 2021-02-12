@@ -44,6 +44,20 @@ const updateItem = (tableName) => {
 	})
 };
 
+const addDeptQ = () => {
+	inquirer.prompt(
+		{
+			name: 'departmentName',
+			type: 'input',
+			message: 'Enter department name',
+		}
+	).then((answer) => {
+		addItem("role", "heya");
+	});
+
+	mainMenu();
+}
+
 const mainMenu = () => {
 	// Display the main menu for the user.
 	inquirer.prompt(
@@ -57,7 +71,8 @@ const mainMenu = () => {
 		// perform selected action.
 		switch (answer.selectAction) {
 			case (ADD_DEPT):
-				console.log(ADD_DEPT);
+				addDeptQ();
+				// mainMenu();
 				break;
 			case (ADD_ROLE):
 				console.log(ADD_ROLE);
