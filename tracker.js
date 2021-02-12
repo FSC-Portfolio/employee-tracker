@@ -4,8 +4,12 @@ const mysql = require('mysql');
 const ADD_DEPT = "Add Department";
 const ADD_ROLE = "Add Role";
 const ADD_EMP = "Add Employee";
-const VIEW = "VIEW";
-const UPDATE = "UPDATE";
+const VIEW_DEPT = "View Department";
+const VIEW_ROLE = "View Role";
+const VIEW_EMP = "View Employee";
+const UPDATE_EMP_ROLE = "Update Employee Role";
+
+const SEP = new inquirer.Separator();
 
 const connection = mysql.createConnection({
 	// Connect to Local database
@@ -47,7 +51,7 @@ const mainMenu = () => {
 			name: 'selectAction',
 			type: 'list',
 			message: 'Please select an action',
-			choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, new inquirer.Separator(), VIEW, UPDATE],
+			choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP],
 		}
 	).then((answer) => {
 		// perform selected action.
@@ -61,11 +65,17 @@ const mainMenu = () => {
 			case (ADD_EMP):
 				console.log(ADD_EMP);
 				break;
-			case (VIEW):
-				console.log("viewin");
+			case (VIEW_DEPT):
+				console.log(VIEW_DEPT);
 				break;
-			case (UPDATE):
-				console.log("updating");
+			case (VIEW_ROLE):
+				console.log(VIEW_ROLE);
+				break;
+			case (VIEW_EMP):
+				console.log(VIEW_EMP);
+				break;
+			case (UPDATE_EMP_ROLE):
+				console.log(UPDATE_EMP_ROLE);
 				break;
 			default:
 				console.log("peace!");
