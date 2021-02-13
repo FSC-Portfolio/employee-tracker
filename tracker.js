@@ -22,13 +22,12 @@ const connection = mysql.createConnection({
 
 const addItem = (tableName, itemsToAdd) => {
 	// Take an object and add it to the specified table.
-	console.log(tableName, itemsToAdd);
-	// const query = "INSERT INTO ?? SET ?";
-	// let values = itemsToAdd;
-	// connection.query(query, [tableName, values], (err, result) => {
-	// 	if (err) throw err;
-	// 	console.log(result);
-	// });
+	const query = "INSERT INTO ?? SET ?";
+	let values = itemsToAdd;
+	connection.query(query, [tableName, values], (err, res) => {
+		if (err) throw err;
+	});
+	return true;
 };
 
 const viewItem = (tableName) => {
@@ -45,18 +44,23 @@ const updateItem = (tableName) => {
 	})
 };
 
-const addDeptQ = () => {
-	inquirer.prompt([
-			{
-				name: 'departmentName',
-				type: 'input',
-				message: 'Enter department name',
-			},
-		]
-	).then((answer) => {
-		addItem("role", "heya");
-	});
-}
+const roleQuestions = [
+	{
+		name: 'title',
+		type: 'input',
+		message: 'Please enter a role title',
+	},
+	{
+		name: 'salary',
+		type: 'number',
+		message: 'Please enter a salary',
+	},
+	{
+		name: 'department_id',
+		type: 'input',
+		message: 'Please select a department',
+	},
+];
 
 const deptQuestions = [
 	{
@@ -64,7 +68,7 @@ const deptQuestions = [
 		type: 'input',
 		message: 'Enter department name',
 	},
-]
+];
 
 const menuQuestions = [
 	{
@@ -73,7 +77,7 @@ const menuQuestions = [
 		message: 'Please select an action',
 		choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
 	},
-]
+];
 
 const mainMenu = async () => {
 	// Ask the user what they want todo first.
@@ -85,18 +89,27 @@ const mainMenu = async () => {
 			switch (mainMenuQ.selectAction) {
 				case (ADD_DEPT):
 					const askDept = await inquirer.prompt(deptQuestions).then((answer) => {
-						addItem("role", answer.departmentName);
+						addItem("department", {name: answer.departmentName});
 					});
 					mainMenuQ = await inquirer.prompt(menuQuestions);
 					break;
+
 				case (ADD_ROLE):
-					console.log(ADD_ROLE);
+					const askRole = await inquirer.prompt(roleQuestions).then((answer) => {
+						addItem("role", {
+							title: answer.title,
+							salary: answer.salary,
+							department_id: answer.departmentId});
+					});
 					mainMenuQ = await inquirer.prompt(menuQuestions);
 					break;
+
 				case (ADD_EMP):
 					console.log(ADD_EMP);
+					//{first_name: "Frank", last_name: "Beans", role_id: 1, manager_id: 1});
 					mainMenuQ = await inquirer.prompt(menuQuestions);
 					break;
+
 				case (VIEW_DEPT):
 					console.log(VIEW_DEPT);
 					mainMenuQ = await inquirer.prompt(menuQuestions);
@@ -115,6 +128,7 @@ const mainMenu = async () => {
 					break;
 				default:
 					console.log("peace!");
+					connection.end();
 					gameOn = false;
 					break;
 			}
@@ -123,15 +137,9 @@ const mainMenu = async () => {
 }
 
 
-// connection.connect((err) => {
-// 	if(err) throw err;
-// 	// addItem("department", {title: "survey"});
-// 	// addItem("role", {title: "Surveyor", salary: 99999.99, department_id: 1});
-// 	// addItem("employee",
-// 	// 	{first_name: "Frank", last_name: "Beans", role_id: 1, manager_id: 1});
-// 	// connection.end();
-// 	mainMenu();
-// });
-
+connection.connect((err) => {
+	if(err) throw err;
+});
 
 let promise = mainMenu();
+
