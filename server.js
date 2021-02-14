@@ -37,6 +37,7 @@ const start = () => {
 			name: 'selectAction',
 			type: 'list',
 			message: 'Please select an action',
+			// choices: [VIEW_EMP, 'Quit'],
 			choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
 		},)
 		.then((answer) => {
@@ -263,22 +264,35 @@ const getDepartment = () => {
 };
 
 const getRole = () => {
-	connection.query('SELECT * FROM role', (err, res) => {
+	let roleQuery = 'SELECT * FROM role';
+	roleQuery += ' INNER JOIN department ON (role.department_id = department.id)';
+	connection.query(roleQuery, (err, res) => {
 		if(err) throw err;
 		console.log("/---Roles---/");
 		res.forEach((item) => {
-			console.log(`${item.title}`);
+			console.log(`#${item.title} || Salary: ${item.salary} || Department: ${item.name}`);
+			// console.dir(item);
 		});
 		doPause();
 	});
 }
 
 const getEmployee = () => {
-	connection.query('SELECT * FROM employee', (err, res) => {
+	// Put a bumper query together to get all the info on the employees.
+	let employeeQuery = "SELECT";
+	employeeQuery += " CONCAT(e.first_name, e.last_name) AS Employee,";
+	employeeQuery += " CONCAT(m.first_name, m.last_name) AS Manager,";
+	employeeQuery += "  r.title, r.salary, d.name, r.department_id";
+	employeeQuery += " FROM employee e";
+	employeeQuery += " INNER JOIN employee m ON (m.id = e.manager_id)";
+	employeeQuery += " INNER JOIN role r ON (r.id = e.role_id)";
+	employeeQuery += " INNER JOIN department d ON (d.id = r.department_id)";
+
+	connection.query(employeeQuery, (err, res) => {
 		if(err) throw err;
 		console.log("/---Employees---/");
 		res.forEach((item) => {
-			console.log(`${item.first_name} ${item.last_name}`);
+			console.log(`${item.Employee} is a ${item.title} from the ${item.name} department, and is managed by ${item.Manager}, they are paid a salary of ${item.salary}`);
 		});
 		doPause();
 	});
