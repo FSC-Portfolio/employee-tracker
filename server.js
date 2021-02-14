@@ -38,7 +38,7 @@ const start = () => {
 			type: 'list',
 			message: 'Please select an action',
 			// choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
-			choices: [UPDATE_EMP_ROLE, SEP, 'Quit'],
+			choices: [ADD_EMP, UPDATE_EMP_ROLE, SEP, 'Quit'],
 		},)
 		.then((answer) => {
 			switch (answer.selectAction) {
@@ -152,7 +152,7 @@ const postRole = () => {
 };
 
 const postEmployee = (existingEmployee =-1) => {
-	if (existingEmployee) console.dir(existingEmployee);
+	if (existingEmployee === -1 ) existingEmployee = false;
 	// query the database for department info.
 	connection.query('SELECT * FROM role', (err, results) => {
 		if (err) throw err;
@@ -206,7 +206,6 @@ const postEmployee = (existingEmployee =-1) => {
 							results.forEach(({id, first_name, last_name}) => {
 								choiceArray.push(`${first_name} ${last_name}`);
 							});
-							console.log(choiceArray);
 							return choiceArray;
 						},
 						message: 'employee manager',
@@ -221,14 +220,22 @@ const postEmployee = (existingEmployee =-1) => {
 						}
 					});
 
-					// when finished prompting, insert a new item into the db with that info
-					const query = "INSERT INTO employee SET ?";
+					let query;
+
+					if (existingEmployee) {
+						query = `UPDATE employee SET ? WHERE id = ${existingEmployee.id}`;
+					} else {
+						// when finished prompting, insert a new item into the db with that info
+						query = "INSERT INTO employee SET ?";
+					}
+
 					let values = {
 						first_name: answer.first_name,
 						last_name: answer.last_name,
 						role_id: chosenItem,
 						manager_id: chosenManager
 					};
+
 					connection.query(query, values, (err) => {
 						if (err) throw err;
 						console.log('Your employee was created successfully!');
