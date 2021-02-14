@@ -51,10 +51,13 @@ const start = () => {
 					postEmployee();
 					break;
 				case (VIEW_DEPT):
+					getDepartment();
 					break;
 				case (VIEW_ROLE):
+					getRole();
 					break;
 				case (VIEW_EMP):
+					getEmployee();
 					break;
 				case (UPDATE_EMP_ROLE):
 					break;
@@ -196,6 +199,7 @@ const postEmployee = () => {
 						type: 'rawlist',
 						choices() {
 							const choiceArray = [];
+							choiceArray.push("No Manager");
 							// TODO this query needs to be limited to managers only.
 							results.forEach(({id, first_name, last_name}) => {
 								choiceArray.push(`${first_name} ${last_name}`);
@@ -234,6 +238,51 @@ const postEmployee = () => {
 		});
 	});
 };
+
+const doPause = () => {
+	inquirer.prompt([
+		{
+			name: "paused...",
+			type: "list",
+			choices: ["press enter to proceed"],
+		},
+	]).then(() => {
+		start();
+	});
+}
+
+const getDepartment = () => {
+	connection.query('SELECT * FROM department', (err, res) => {
+		if (err) throw err;
+		console.log("/---Departments---/");
+		res.forEach((item) => {
+			console.log(`${item.name}`);
+		});
+		doPause();
+	});
+};
+
+const getRole = () => {
+	connection.query('SELECT * FROM role', (err, res) => {
+		if(err) throw err;
+		console.log("/---Roles---/");
+		res.forEach((item) => {
+			console.log(`${item.title}`);
+		});
+		doPause();
+	});
+}
+
+const getEmployee = () => {
+	connection.query('SELECT * FROM employee', (err, res) => {
+		if(err) throw err;
+		console.log("/---Employees---/");
+		res.forEach((item) => {
+			console.log(`${item.first_name} ${item.last_name}`);
+		});
+		doPause();
+	});
+}
 
 // connect to the mysql server and sql database
 connection.connect((err) => {
