@@ -151,7 +151,8 @@ const postRole = () => {
 	});
 };
 
-const postEmployee = (existingEmployee = {}) => {
+const postEmployee = (existingEmployee =-1) => {
+	if (existingEmployee) console.dir(existingEmployee);
 	// query the database for department info.
 	connection.query('SELECT * FROM role', (err, results) => {
 		if (err) throw err;
@@ -302,8 +303,7 @@ const updateEmployee = () => {
 	// query the database for department info.
 	// show all employees
 	let employeeQuery = "SELECT";
-	employeeQuery += ' CONCAT(e.first_name, " ", e.last_name) AS selected_employee,';
-	employeeQuery += "e.id, e.first_name, e.last_name";
+	employeeQuery += " e.id, e.first_name, e.last_name, e.role_id, e.manager_id";
 	employeeQuery += " FROM employee e";
 	connection.query(employeeQuery, (err, results) => {
 		if (err) throw err;
@@ -314,8 +314,8 @@ const updateEmployee = () => {
 				type: 'rawlist',
 				choices() {
 					const choiceArray = [];
-					results.forEach(({id, first_name, last_name, selected_employee}) => {
-						let uniqueEmp = `${id} ${last_name}, ${first_name}`;
+					results.forEach(({id, first_name, last_name}) => {
+						let uniqueEmp = `[id: ${id}] ${last_name}, ${first_name}`;
 						choiceArray.push(uniqueEmp);
 					});
 					return choiceArray;
@@ -326,17 +326,21 @@ const updateEmployee = () => {
 			// get the information of the chosen item
 			let chosenItem;
 			results.forEach((item) => {
-				console.log(item);
-				let uniqueEmp = `${item.id} ${item.last_name}, ${item.first_name}`;
+				let uniqueEmp = `[id: ${item.id}] ${item.last_name}, ${item.first_name}`;
 				if (uniqueEmp === answer.employee_id) {
-					chosenItem = item.id;
-					// TODO now we have the employee to edit, send the id to the employee creator.
-					console.log("got him", chosenItem);
+					chosenItem = {
+						id: item.id,
+						first_name: item.first_name,
+						last_name: item.last_name,
+						manager_id: item.manager_id,
+						role_id: item.role_id,
+					};
 				}
 			});
+			postEmployee(chosenItem);
+			// connection.end();
 		});
 	});
-	connection.end();
 };
 
 // connect to the mysql server and sql database
