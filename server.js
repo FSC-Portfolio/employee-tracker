@@ -1,13 +1,17 @@
 "use strict";
+// Script requirements.
 const inquirer = require('inquirer');
 const mysql = require('mysql');
+const cTable = require('console.table');
+
+// Script Constants.
 const ADD_DEPT = "Add Department";
 const ADD_ROLE = "Add Role";
 const ADD_EMP = "Add Employee";
 const VIEW_DEPT = "View Department";
 const VIEW_ROLE = "View Role";
 const VIEW_EMP = "View Employee";
-const UPDATE_EMP_ROLE = "Update Employee Role";
+const UPDATE_EMP_ROLE = "Update Employee Role and / or Manager";
 
 const SEP = new inquirer.Separator();
 
@@ -32,43 +36,42 @@ const addItem = (tableName, itemsToAdd) => {
 
 // function which prompts the user for what action they should take
 const start = () => {
-	inquirer
-		.prompt({
-			name: 'selectAction',
-			type: 'list',
-			message: 'Please select an action',
-			// choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
-			choices: [ADD_EMP, UPDATE_EMP_ROLE, SEP, 'Quit'],
-		},)
-		.then((answer) => {
-			switch (answer.selectAction) {
-				case (ADD_DEPT):
-					postDepartment();
-					break;
-				case (ADD_ROLE):
-					postRole();
-					break;
-				case (ADD_EMP):
-					postEmployee();
-					break;
-				case (VIEW_DEPT):
-					getDepartment();
-					break;
-				case (VIEW_ROLE):
-					getRole();
-					break;
-				case (VIEW_EMP):
-					getEmployee();
-					break;
-				case (UPDATE_EMP_ROLE):
-					updateEmployee();
-					break;
-				default:
-					console.log("peace!");
-					connection.end();
-					break;
-			}
-		});
+	inquirer.prompt({
+		name: 'selectAction',
+		type: 'list',
+		message: 'Please select an action',
+		choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
+		// choices: [ADD_EMP, UPDATE_EMP_ROLE, SEP, 'Quit'],
+	},)
+	.then((answer) => {
+		switch (answer.selectAction) {
+			case (ADD_DEPT):
+				postDepartment();
+				break;
+			case (ADD_ROLE):
+				postRole();
+				break;
+			case (ADD_EMP):
+				postEmployee();
+				break;
+			case (VIEW_DEPT):
+				getDepartment();
+				break;
+			case (VIEW_ROLE):
+				getRole();
+				break;
+			case (VIEW_EMP):
+				getEmployee();
+				break;
+			case (UPDATE_EMP_ROLE):
+				updateEmployee();
+				break;
+			default:
+				console.log("peace!");
+				connection.end();
+				break;
+		}
+	});
 };
 
 // Function to create new department.
@@ -152,7 +155,16 @@ const postRole = () => {
 };
 
 const postEmployee = (existingEmployee =-1) => {
-	if (existingEmployee === -1 ) existingEmployee = false;
+	if (existingEmployee === -1 ) {
+		existingEmployee = {
+			id: item.id,
+			first_name: item.first_name,
+			last_name: item.last_name,
+			manager_id: item.manager_id,
+			role_id: item.role_id,
+		}
+	}
+
 	// query the database for department info.
 	connection.query('SELECT * FROM role', (err, results) => {
 		if (err) throw err;
@@ -176,11 +188,13 @@ const postEmployee = (existingEmployee =-1) => {
 				name: 'first_name',
 				type: 'input',
 				message: 'What is the employees first name?',
+				default: existingEmployee.first_name,
 			},
 			{
 				name: 'last_name',
 				type: 'input',
 				message: 'Please enter employees last name',
+				default: existingEmployee.last_name,
 			},
 		]).then((answer) => {
 			// get the information of the chosen item
@@ -264,9 +278,10 @@ const getDepartment = () => {
 	connection.query('SELECT * FROM department', (err, res) => {
 		if (err) throw err;
 		console.log("/---Departments---/");
-		res.forEach((item) => {
-			console.log(`${item.name}`);
-		});
+		console.table(res);
+		// res.forEach((item) => {
+		// 	console.log(`${item.name}`);
+		// });
 		doPause();
 	});
 };
@@ -277,10 +292,10 @@ const getRole = () => {
 	connection.query(roleQuery, (err, res) => {
 		if(err) throw err;
 		console.log("/---Roles---/");
-		res.forEach((item) => {
-			console.log(`#${item.title} || Salary: ${item.salary} || Department: ${item.name}`);
-			// console.dir(item);
-		});
+		// res.forEach((item) => {
+		// 	console.log(`#${item.title} || Salary: ${item.salary} || Department: ${item.name}`);
+		// });
+		console.table(res);
 		doPause();
 	});
 };
@@ -299,9 +314,10 @@ const getEmployee = () => {
 	connection.query(employeeQuery, (err, res) => {
 		if(err) throw err;
 		console.log("/---Employees---/");
-		res.forEach((item) => {
-			console.log(`${item.Employee} is a ${item.title} from the ${item.name} department, and is managed by ${item.Manager}, they are paid a salary of ${item.salary}`);
-		});
+		console.table(res);
+		// res.forEach((item) => {
+		// 	console.log(`${item.Employee} is a ${item.title} from the ${item.name} department, and is managed by ${item.Manager}, they are paid a salary of ${item.salary}`);
+		// });
 		doPause();
 	});
 };
@@ -345,7 +361,6 @@ const updateEmployee = () => {
 				}
 			});
 			postEmployee(chosenItem);
-			// connection.end();
 		});
 	});
 };
