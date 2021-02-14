@@ -40,16 +40,28 @@ const start = () => {
 			choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
 		},)
 		.then((answer) => {
-			// based on their answer, either call the bid or the post functions
-			if (answer.selectAction === ADD_DEPT) {
-				postDepartment();
-			} else if (answer.selectAction === ADD_ROLE) {
-				postRole();
-			}else if (answer.selectAction === ADD_EMP) {
-				console.log("add employee");
-				postEmployee();
-			} else {
-				connection.end();
+			switch (answer.selectAction) {
+				case (ADD_DEPT):
+					postDepartment();
+					break;
+				case (ADD_ROLE):
+					postRole();
+					break;
+				case (ADD_EMP):
+					postEmployee();
+					break;
+				case (VIEW_DEPT):
+					break;
+				case (VIEW_ROLE):
+					break;
+				case (VIEW_EMP):
+					break;
+				case (UPDATE_EMP_ROLE):
+					break;
+				default:
+					console.log("peace!");
+					connection.end();
+					break;
 			}
 		});
 };
@@ -174,19 +186,50 @@ const postEmployee = () => {
 				}
 			});
 
-			// when finished prompting, insert a new item into the db with that info
-			const query = "INSERT INTO employee SET ?";
-			let values = {
-				first_name: answer.first_name,
-				last_name: answer.last_name,
-				role_id: chosenItem,
-				manager_id: null
-			};
-			connection.query(query, values, (err) => {
+			// Add the manager here.
+			connection.query('SELECT * FROM employee', (err, results) => {
 				if (err) throw err;
-				console.log('Your employee was created successfully!');
-				// take the user back to the main menu.
-				start();
+				// Prompt the user for employee information.
+				inquirer.prompt([
+					{
+						name: 'manager_id',
+						type: 'rawlist',
+						choices() {
+							const choiceArray = [];
+							// TODO this query needs to be limited to managers only.
+							results.forEach(({id, first_name, last_name}) => {
+								choiceArray.push(`${first_name} ${last_name}`);
+							});
+							console.log(choiceArray);
+							return choiceArray;
+						},
+						message: 'employee manager',
+					},
+				]).then((answer_emp) => {
+					// get the information of the chosen item
+					let chosenManager;
+					results.forEach((item) => {
+						if (`${item.first_name} ${item.last_name}` === answer_emp.manager_id) {
+							chosenManager = item.id;
+							console.log("got a manager");
+						}
+					});
+
+					// when finished prompting, insert a new item into the db with that info
+					const query = "INSERT INTO employee SET ?";
+					let values = {
+						first_name: answer.first_name,
+						last_name: answer.last_name,
+						role_id: chosenItem,
+						manager_id: chosenManager
+					};
+					connection.query(query, values, (err) => {
+						if (err) throw err;
+						console.log('Your employee was created successfully!');
+						// take the user back to the main menu.
+						start();
+					});
+				});
 			});
 		});
 	});
