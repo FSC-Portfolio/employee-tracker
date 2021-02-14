@@ -37,8 +37,8 @@ const start = () => {
 			name: 'selectAction',
 			type: 'list',
 			message: 'Please select an action',
-			// choices: [VIEW_EMP, 'Quit'],
-			choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
+			// choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
+			choices: [UPDATE_EMP_ROLE, SEP, 'Quit'],
 		},)
 		.then((answer) => {
 			switch (answer.selectAction) {
@@ -61,6 +61,7 @@ const start = () => {
 					getEmployee();
 					break;
 				case (UPDATE_EMP_ROLE):
+					updateEmployee();
 					break;
 				default:
 					console.log("peace!");
@@ -150,7 +151,7 @@ const postRole = () => {
 	});
 };
 
-const postEmployee = () => {
+const postEmployee = (existingEmployee = {}) => {
 	// query the database for department info.
 	connection.query('SELECT * FROM role', (err, results) => {
 		if (err) throw err;
@@ -186,7 +187,6 @@ const postEmployee = () => {
 			results.forEach((item) => {
 				if (item.title === answer.role_id) {
 					chosenItem = item.id;
-					console.log("got one");
 				}
 			});
 
@@ -250,7 +250,7 @@ const doPause = () => {
 	]).then(() => {
 		start();
 	});
-}
+};
 
 const getDepartment = () => {
 	connection.query('SELECT * FROM department', (err, res) => {
@@ -275,7 +275,7 @@ const getRole = () => {
 		});
 		doPause();
 	});
-}
+};
 
 const getEmployee = () => {
 	// Put a bumper query together to get all the info on the employees.
@@ -296,7 +296,48 @@ const getEmployee = () => {
 		});
 		doPause();
 	});
-}
+};
+
+const updateEmployee = () => {
+	// query the database for department info.
+	// show all employees
+	let employeeQuery = "SELECT";
+	employeeQuery += ' CONCAT(e.first_name, " ", e.last_name) AS selected_employee,';
+	employeeQuery += "e.id, e.first_name, e.last_name";
+	employeeQuery += " FROM employee e";
+	connection.query(employeeQuery, (err, results) => {
+		if (err) throw err;
+		// Prompt the user for role information.
+		inquirer.prompt([
+			{
+				name: 'employee_id',
+				type: 'rawlist',
+				choices() {
+					const choiceArray = [];
+					results.forEach(({id, first_name, last_name, selected_employee}) => {
+						let uniqueEmp = `${id} ${last_name}, ${first_name}`;
+						choiceArray.push(uniqueEmp);
+					});
+					return choiceArray;
+				},
+				message: 'Select an employee to edit',
+			},
+		]).then((answer) => {
+			// get the information of the chosen item
+			let chosenItem;
+			results.forEach((item) => {
+				console.log(item);
+				let uniqueEmp = `${item.id} ${item.last_name}, ${item.first_name}`;
+				if (uniqueEmp === answer.employee_id) {
+					chosenItem = item.id;
+					// TODO now we have the employee to edit, send the id to the employee creator.
+					console.log("got him", chosenItem);
+				}
+			});
+		});
+	});
+	connection.end();
+};
 
 // connect to the mysql server and sql database
 connection.connect((err) => {
