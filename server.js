@@ -45,6 +45,9 @@ const start = () => {
 				postDepartment();
 			} else if (answer.selectAction === ADD_ROLE) {
 				postRole();
+			}else if (answer.selectAction === ADD_EMP) {
+				console.log("add employee");
+				postEmployee();
 			} else {
 				connection.end();
 			}
@@ -80,55 +83,112 @@ const postRole = () => {
 	connection.query('SELECT * FROM department', (err, results) => {
 		if (err) throw err;
 		// Prompt the user for role information.
-		inquirer
-			.prompt([
-				{
-					name: 'department_id',
-					type: 'rawlist',
-					choices() {
-						const choiceArray = [];
-						results.forEach(({department_id, name }) => {
-							choiceArray.push({department_id , name});
-						});
-						return choiceArray;
-					},
-					message: 'What department does the role belong to?',
+		inquirer.prompt([
+			{
+				name: 'department_id',
+				type: 'rawlist',
+				choices() {
+					const choiceArray = [];
+					results.forEach(({department_id, name }) => {
+						choiceArray.push({department_id , name});
+					});
+					return choiceArray;
 				},
-				{
-					name: 'name',
-					type: 'input',
-					message: 'What is the name of the role?',
-				},
-				{
-					name: 'salary',
-					type: 'number',
-					message: 'PLease enter role salary',
-				},
-			])
-			.then((answer) => {
-				// get the information of the chosen item
-				let chosenItem;
-				results.forEach((item) => {
-					if (item.name === answer.department_id) {
-						chosenItem = item.id;
-					}
-				});
-				// when finished prompting, insert a new item into the db with that info
-				const query = "INSERT INTO role SET ?";
-				let values = {
-					title: answer.name,
-					salary: answer.salary,
-					department_id: chosenItem,
-				};
-				console.log(values);
-				connection.query(query, values, (err) => {
-						if (err) throw err;
-						console.log('Your role was created successfully!');
-						// take the user back to the main menu.
-						start();
-					}
-				);
+				message: 'What department does the role belong to?',
+			},
+			{
+				name: 'name',
+				type: 'input',
+				message: 'What is the name of the role?',
+			},
+			{
+				name: 'salary',
+				type: 'number',
+				message: 'PLease enter role salary',
+			},
+		])
+		.then((answer) => {
+			// get the information of the chosen item
+			let chosenItem;
+			results.forEach((item) => {
+				if (item.name === answer.department_id) {
+					chosenItem = item.id;
+				}
 			});
+			// when finished prompting, insert a new item into the db with that info
+			const query = "INSERT INTO role SET ?";
+			let values = {
+				title: answer.name,
+				salary: answer.salary,
+				department_id: chosenItem,
+			};
+			console.log(values);
+			connection.query(query, values, (err) => {
+					if (err) throw err;
+					console.log('Your role was created successfully!');
+					// take the user back to the main menu.
+					start();
+				}
+			);
+		});
+	});
+};
+
+const postEmployee = () => {
+	// query the database for department info.
+	connection.query('SELECT * FROM role', (err, results) => {
+		if (err) throw err;
+		// Prompt the user for employee information.
+		inquirer.prompt([
+			{
+				name: 'role_id',
+				type: 'rawlist',
+				choices() {
+					const choiceArray = [];
+					results.forEach(({id, title}) => {
+						// console.log({id, title});
+						choiceArray.push(title);
+					});
+					console.log(choiceArray);
+					return choiceArray;
+				},
+				message: 'employee role',
+			},
+			{
+				name: 'first_name',
+				type: 'input',
+				message: 'What is the employees first name?',
+			},
+			{
+				name: 'last_name',
+				type: 'input',
+				message: 'Please enter employees last name',
+			},
+		]).then((answer) => {
+			// get the information of the chosen item
+			let chosenItem;
+			results.forEach((item) => {
+				if (item.title === answer.role_id) {
+					chosenItem = item.id;
+					console.log("got one");
+				}
+			});
+
+			// when finished prompting, insert a new item into the db with that info
+			const query = "INSERT INTO employee SET ?";
+			let values = {
+				first_name: answer.first_name,
+				last_name: answer.last_name,
+				role_id: chosenItem,
+				manager_id: null
+			};
+			connection.query(query, values, (err) => {
+				if (err) throw err;
+				console.log('Your employee was created successfully!');
+				// take the user back to the main menu.
+				start();
+			});
+		});
 	});
 };
 
