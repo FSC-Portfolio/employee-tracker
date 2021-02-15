@@ -1,9 +1,20 @@
 [![None :)](https://img.shields.io/badge/License-None-&#58&#41-yellow)](https://img.shields.io/badge/License-&#58&#41-yellow)
 # Node Employee Tracker
+## Table of Contents
+> - [Table of Contents](#Table-of-Contents)
+> - [Description](#Description)
+> - [Installation](#Installation)
+> - [Usage](#Usage)
+> - [License](#License)
+> - [Contributing](#Contributing)
+> - [Tests](#Tests)
+> - [Questions](#Questions)
+
 ## Description
 Manage employees and departments using node connected to an instance of MySQL.
-[view screencast on youtube](https://youtu.be/h9DlYttWTDU)
-[View it on GitHub](https://github.com/JayArghArgh/employee-tracker)
+
+* [view screencast on youtube](https://youtu.be/h9DlYttWTDU)
+* [View it on GitHub](https://github.com/JayArghArgh/employee-tracker)
 
 The following goals were completed;
 
@@ -22,16 +33,6 @@ The following were not yet implemented:
 
 ![screenshot](./Assets/screenshot.png)
 
-## Table of Contents
-> - [Description](#Description)
-> - [Table of Contents](#Table-of-Contents)
-> - [Installation](#Installation)
-> - [Usage](#Usage)
-> - [License](#License)
-> - [Contributing](#Contributing)
-> - [Tests](#Tests)
-> - [Questions](#Questions)
-
 ## Installation
 ```git clone https://github.com/JayArghArgh/employee-tracker.git``` Will clone the repo and create the following directory structure.
 ```md
@@ -43,14 +44,16 @@ README.md
 package.json
 server.js			// runs the application
 ```
-`node i` will install mysql, inquirer, and console.table
-open server.js and insert your mysql password.
-Navigate to Assets
-Run the following command(s) to setup the database and seed data
-`mysql -u [username] -p`
-`[enter your password]`
-`source employee-tracker_SCHEMA.sql`
-`quit`
+
+* `node i` will install mysql, inquirer, and console.table
+* open server.js and insert your mysql password.
+* Navigate to Assets
+* Run the following command(s) to setup the database and seed data
+* `mysql -u [username] -p`
+* `[enter your password]`
+* `source employee-tracker_SCHEMA.sql`
+* `quit`
+
 ## Usage
 `node server.js` will present the user with a console based menu for adding roles, departments and employees. Employees can be edited.
 ## License
