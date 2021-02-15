@@ -26,3 +26,25 @@ CREATE TABLE employee (
     FOREIGN KEY(role_id) REFERENCES role(id),
     FOREIGN KEY(manager_id) REFERENCES employee(id)
 );
+
+USE emp_tracker_db;
+
+INSERT INTO department(name)
+	VALUES
+		("Commercial"),
+        ("Construction")
+;
+
+INSERT INTO role (title, salary, department_id)
+	VALUES
+		("Project Manager", 50000.00, 1),
+		("Commercial Manager", 50000.00, 1),
+		("Construction Manager", 50000.00, 2)
+;
+
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
+	VALUES
+		("Ralph", "Wiggum", 1, NULL),
+		("Homer", "Simpson", 2, 1),
+		("Bart", "Simpson", 3, 1)
+;

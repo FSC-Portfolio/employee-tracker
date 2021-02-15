@@ -10,11 +10,14 @@ const ADD_ROLE = "Add Role";
 const ADD_EMP = "Add Employee";
 const VIEW_DEPT = "View Department";
 const VIEW_ROLE = "View Role";
-const VIEW_EMP = "View Employee";
+const VIEW_EMP = "View Employees";
+const VIEW_ALL = "View Everything";
 const UPDATE_EMP_ROLE = "Update Employee Role and / or Manager";
+const VIEW_MAN = "View employees grouped by manager";  // Not yet implemented.
 
 const SEP = new inquirer.Separator();
 
+// Setup connection to the database.
 const connection = mysql.createConnection({
 	// Connect to Local database
 	host: 'localhost',
@@ -40,7 +43,18 @@ const start = () => {
 		name: 'selectAction',
 		type: 'list',
 		message: 'Please select an action',
-		choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
+		choices: [
+			ADD_DEPT,
+			ADD_ROLE,
+			ADD_EMP, SEP,
+			VIEW_DEPT,
+			VIEW_ROLE,
+			VIEW_EMP,
+			VIEW_ALL, SEP,
+			// VIEW_MAN, SEP,
+			UPDATE_EMP_ROLE, SEP,
+			'Quit'
+		],
 	},)
 	.then((answer) => {
 		switch (answer.selectAction) {
@@ -54,13 +68,19 @@ const start = () => {
 				postEmployee();
 				break;
 			case (VIEW_DEPT):
-				getDepartment();
+				getDepartment(true);
 				break;
 			case (VIEW_ROLE):
-				getRole();
+				getRole(true);
 				break;
 			case (VIEW_EMP):
-				getEmployee();
+				getEmployee(true);
+				break;
+			case (VIEW_ALL):
+				getEverything();
+				break;
+			case (VIEW_MAN):
+				getEmployeeGrouped(true);
 				break;
 			case (UPDATE_EMP_ROLE):
 				updateEmployee();
@@ -141,7 +161,6 @@ const postRole = () => {
 				salary: answer.salary,
 				department_id: chosenItem,
 			};
-			console.log(values);
 			connection.query(query, values, (err) => {
 					if (err) throw err;
 					console.log('Your role was created successfully!');
@@ -153,14 +172,15 @@ const postRole = () => {
 	});
 };
 
-const postEmployee = (existingEmployee =-1) => {
-	if (existingEmployee === -1 ) {
+const postEmployee = (existingEmployee =false) => {
+	// Add or update an employee
+	if (!existingEmployee ) {
 		existingEmployee = {
-			id: item.id,
-			first_name: item.first_name,
-			last_name: item.last_name,
-			manager_id: item.manager_id,
-			role_id: item.role_id,
+			id: "new",
+			first_name: "",
+			last_name: "",
+			manager_id: 1,
+			role_id: 1,
 		}
 	}
 
@@ -175,10 +195,8 @@ const postEmployee = (existingEmployee =-1) => {
 				choices() {
 					const choiceArray = [];
 					results.forEach(({id, title}) => {
-						// console.log({id, title});
 						choiceArray.push(title);
 					});
-					console.log(choiceArray);
 					return choiceArray;
 				},
 				message: 'employee role',
@@ -229,19 +247,19 @@ const postEmployee = (existingEmployee =-1) => {
 					results.forEach((item) => {
 						if (`${item.first_name} ${item.last_name}` === answer_emp.manager_id) {
 							chosenManager = item.id;
-							console.log("got a manager");
 						}
 					});
 
 					let query;
-
-					if (existingEmployee) {
+					// Quick check to see if this is a new employee, or one being updated.
+					if (existingEmployee.id !== "new") {
 						query = `UPDATE employee SET ? WHERE id = ${existingEmployee.id}`;
 					} else {
 						// when finished prompting, insert a new item into the db with that info
 						query = "INSERT INTO employee SET ?";
 					}
 
+					// Set the values for the query.
 					let values = {
 						first_name: answer.first_name,
 						last_name: answer.last_name,
@@ -262,6 +280,7 @@ const postEmployee = (existingEmployee =-1) => {
 };
 
 const doPause = () => {
+	// Inserts a pause for the user where required.
 	inquirer.prompt([
 		{
 			name: "paused...",
@@ -273,27 +292,30 @@ const doPause = () => {
 	});
 };
 
-const getDepartment = () => {
+const getDepartment = (pause) => {
+	// Gets and displays the departments.
 	connection.query('SELECT * FROM department', (err, res) => {
 		if (err) throw err;
 		console.log("/---Departments---/");
 		console.table(res);
-		doPause();
+		if (pause) doPause();
 	});
 };
 
-const getRole = () => {
+const getRole = (pause) => {
+	// Gets and displays the roles
 	let roleQuery = 'SELECT * FROM role';
 	roleQuery += ' INNER JOIN department ON (role.department_id = department.id)';
 	connection.query(roleQuery, (err, res) => {
 		if(err) throw err;
 		console.log("/---Roles---/");
 		console.table(res);
-		doPause();
+		if (pause) doPause();
 	});
 };
 
-const getEmployee = () => {
+const getEmployee = (pause) => {
+	// Gets and displays the employees
 	// Put a bumper query together to get all the info on the employees.
 	let employeeQuery = "SELECT";
 	employeeQuery += ' CONCAT(e.first_name, " ", e.last_name) AS Employee,';
@@ -308,13 +330,20 @@ const getEmployee = () => {
 		if(err) throw err;
 		console.log("/---Employees---/");
 		console.table(res);
-		doPause();
+		if (pause) doPause();
 	});
 };
 
+const getEverything = () => {
+	// Returns Roles, Departments, Employees.
+	getRole(false);
+	getDepartment(false);
+	getEmployee(true);
+}
+
 const updateEmployee = () => {
+	// Gets exisitn gemplopyee info, and parses it to postEmployee()
 	// query the database for department info.
-	// show all employees
 	let employeeQuery = "SELECT";
 	employeeQuery += " e.id, e.first_name, e.last_name, e.role_id, e.manager_id";
 	employeeQuery += " FROM employee e";
