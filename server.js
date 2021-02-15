@@ -41,7 +41,6 @@ const start = () => {
 		type: 'list',
 		message: 'Please select an action',
 		choices: [ADD_DEPT, ADD_ROLE, ADD_EMP, SEP, VIEW_DEPT, VIEW_ROLE, VIEW_EMP, SEP, UPDATE_EMP_ROLE, SEP, 'Quit'],
-		// choices: [ADD_EMP, UPDATE_EMP_ROLE, SEP, 'Quit'],
 	},)
 	.then((answer) => {
 		switch (answer.selectAction) {
@@ -279,9 +278,6 @@ const getDepartment = () => {
 		if (err) throw err;
 		console.log("/---Departments---/");
 		console.table(res);
-		// res.forEach((item) => {
-		// 	console.log(`${item.name}`);
-		// });
 		doPause();
 	});
 };
@@ -292,9 +288,6 @@ const getRole = () => {
 	connection.query(roleQuery, (err, res) => {
 		if(err) throw err;
 		console.log("/---Roles---/");
-		// res.forEach((item) => {
-		// 	console.log(`#${item.title} || Salary: ${item.salary} || Department: ${item.name}`);
-		// });
 		console.table(res);
 		doPause();
 	});
@@ -303,11 +296,11 @@ const getRole = () => {
 const getEmployee = () => {
 	// Put a bumper query together to get all the info on the employees.
 	let employeeQuery = "SELECT";
-	employeeQuery += " CONCAT(e.first_name, e.last_name) AS Employee,";
-	employeeQuery += " CONCAT(m.first_name, m.last_name) AS Manager,";
+	employeeQuery += ' CONCAT(e.first_name, " ", e.last_name) AS Employee,';
+	employeeQuery += ' CONCAT(m.first_name, " ", m.last_name) AS Manager,';
 	employeeQuery += "  r.title, r.salary, d.name, r.department_id";
 	employeeQuery += " FROM employee e";
-	employeeQuery += " INNER JOIN employee m ON (m.id = e.manager_id)";
+	employeeQuery += " LEFT JOIN employee m ON (m.id = e.manager_id)";
 	employeeQuery += " INNER JOIN role r ON (r.id = e.role_id)";
 	employeeQuery += " INNER JOIN department d ON (d.id = r.department_id)";
 
@@ -315,9 +308,6 @@ const getEmployee = () => {
 		if(err) throw err;
 		console.log("/---Employees---/");
 		console.table(res);
-		// res.forEach((item) => {
-		// 	console.log(`${item.Employee} is a ${item.title} from the ${item.name} department, and is managed by ${item.Manager}, they are paid a salary of ${item.salary}`);
-		// });
 		doPause();
 	});
 };
